@@ -1,33 +1,27 @@
-const router = require('express').Router();
+const notesDB = require('../db/db.json');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
-const fs = require ("fs");
+const router = require('express').Router();
 
-router.get('/api/notes', async (req, res) => {
-  const dbJson = await JSON.parse(fs.readFileSync("db/db.json","utf8"));
-  res.json(dbJson);
-});
-
-router.post('/api/notes', (req, res) => {
-  const dbJson = JSON.parse(fs.readFileSync("db/db.json","utf8"));
-  const newFeedback = {
-    title: req.body.title,
-    text: req.body.text,
-    id: uuidv4(),
-  };
-  dbJson.push(newFeedback);
-  fs.writeFileSync("db/db.json",JSON.stringify(dbJson));
-  res.json(dbJson);
-});
-
-//extra credit - delete
-router.delete('/api/notes/:id', (req, res) => {
-  let data = fs.readFileSync("db/db.json", "utf8");
-  const dataJSON =  JSON.parse(data);
-  const newNotes = dataJSON.filter((note) => { 
-    return note.id !== req.params.id;
+  // GET Request to retrieve notes
+  router.get('/notes', (req, res) => {
+    res.json(notesDB);
   });
-  fs.writeFileSync("db/db.json",JSON.stringify(newNotes));
-  res.json("Note deleted.");
-});
 
-module.exports = router; 
+  // POST Request to save a new note
+  router.post('/notes', (req, res) => {
+    req.body.id = uuidv4();
+    notesDB.push(req.body);
+    fs.writeFileSync('db/db.json', JSON.stringify(notesDB));
+    res.json(req.body);
+  });
+
+  // DELETE Request to delete a note by ID
+  router.delete('/notes/:id', (req, res) => {
+    const pos = notesDB.findIndex(elem => elem.id === req.params.id)
+    notesDB.splice(pos, 1)
+    fs.writeFileSync('db/db.json', JSON.stringify(notesDB));
+    res.json({ message: 'Note deleted' });
+  });
+  
+module.exports = router;
