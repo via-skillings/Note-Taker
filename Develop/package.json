@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.19.2",
+    "sequelize": "^6.37.3",
     "uuid": "^9.0.1",
     "uuidv4": "^6.2.13"
   },
